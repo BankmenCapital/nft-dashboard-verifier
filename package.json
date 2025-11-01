@@ -2,5 +2,9 @@
   "name": "nft-dashboard-verifier",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js"
+  "main": "index.js",
+  "dependencies": {
+    "tweetnacl": "^1.0.3",
+    "bs58": "^5.0.0"
+  }
 }
