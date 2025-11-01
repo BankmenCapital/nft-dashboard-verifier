@@ -4,8 +4,8 @@
 const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=ee8ad64e-dacb-4966-a9a6-65dfeb7d54d6`;
 const COLLECTION_KEY = 'GPtMdqNwNFnZGojyxEseXviJUZiqHyHDzWySjSHFup7J';
 
-import nacl from "https://cdn.skypack.dev/tweetnacl@1.0.3";
-import bs58 from 'https://cdn.skypack.dev/bs58@5.0.0';
+import nacl from "https://cdn.skypack.dev/tweetnacl@1.0.3?v=1";
+import bs58 from 'https://cdn.skypack.dev/bs58@5.0.0?v=1';
 
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request));
