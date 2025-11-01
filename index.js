@@ -5,7 +5,7 @@ const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=ee8ad64e-dacb-4966-a
 const COLLECTION_KEY = 'GPtMdqNwNFnZGojyxEseXviJUZiqHyHDzWySjSHFup7J'; // Your collection
 
 // Ed25519 sig verify (from tweetnacl—install not needed, CF has crypto)
-import nacl from 'https://cdn.skypack.dev/tweetnacl@v1.0.3?dts'; // ESM import for CF
+import nacl from "https://cdn.skypack.dev/tweetnacl@1.0.3";
 import bs58 from 'https://cdn.skypack.dev/bs58@v5.0.0?dts';
 
 addEventListener('fetch', event => {
