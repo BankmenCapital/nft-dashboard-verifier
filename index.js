@@ -1,5 +1,5 @@
 // Cloudflare Worker for NFT-gated auth & XP storage
-// Bindings: KV (env.XP_STORAGE), no other env vars needed
+// Bindings: KV (env.XP_STORAGE), no other env vars needed.
 
 const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=ee8ad64e-dacb-4966-a9a6-65dfeb7d54d6`;
 const COLLECTION_KEY = 'GPtMdqNwNFnZGojyxEseXviJUZiqHyHDzWySjSHFup7J'; // Your collection
