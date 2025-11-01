@@ -1,6 +1,9 @@
-name = "nft-dashboard-verifier-v2"  # ← CHANGE THIS
-main = "index.js"
+name = "nft-dashboard-verifier-v2"
+main = "dist/index.js"  # ← CHANGE THIS
 compatibility_date = "2025-11-01"
+
+[build]
+command = "bun build ./index.js --outdir dist --target=browser"
 
 [[kv_namespaces]]
 binding = "XP_STORAGE"
