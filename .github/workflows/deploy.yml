@@ -18,15 +18,6 @@ jobs:
       - name: Install Wrangler
         run: bun add -g wrangler
 
-      - name: Build Worker
-        run: bun build ./index.js --outdir dist --target=browser
-
-      - name: DEBUG - Show built file
-        run: |
-          echo "=== dist/index.js ==="
-          cat dist/index.js | head -20
-          echo "=== END ==="
-
       - name: Deploy
         run: wrangler deploy
         env:
