@@ -1,4 +1,4 @@
-name = "nft-dashboard-verifier-v2"
+name = "nft-dashboard-verifier"
 main = "dist/index.js"  # ← CHANGE THIS
 compatibility_date = "2025-11-01"
 
