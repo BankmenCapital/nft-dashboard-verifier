@@ -1,0 +1,7 @@
+name = "nft-dashboard-verifier"
+main = "index.js"
+compatibility_date = "2025-11-01"
+
+[[kv_namespaces]]
+binding = "XP_STORAGE"
+id = "f259253be42444d7b1b56025a881a79a"  # e.g., abc123def...
