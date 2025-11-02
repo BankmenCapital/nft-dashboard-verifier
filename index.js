@@ -5,9 +5,6 @@ import bs58 from "bs58";
 const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=ee8ad64e-dacb-4966-a9a6-65dfeb7d54d6`;
 const COLLECTION_KEY = 'GPtMdqNwNFnZGojyxEseXviJUZiqHyHDzWySjSHFup7J';
 
-// ADD THIS IF NOT ALREADY (for KV)
-const XP_STORAGE = YOUR_KV_NAMESPACE;  // e.g., BANKMEN_XP
-
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request));
 });
@@ -34,8 +31,8 @@ async function handleRequest(request) {
       if (!hasNFT) {
         return Response.json({ error: 'No NFT from collection' }, { status: 403, headers: corsHeaders });
       }
-      const token = btoa(JSON.stringify({ pubkey, exp: Date.now() + 86400000 }));
-      return Response.json({ token, pubkey }, { headers: corsHeaders });
+      const token = btoa(JSON.stringify({ pubkey, exp: Date.now() + 86400000 })); // 24h
+      return Response.json({ token }, { headers: corsHeaders });
     }
 
     if (url.pathname === '/xp' && request.method === 'GET') {
@@ -44,7 +41,7 @@ async function handleRequest(request) {
       let payload;
       try { payload = JSON.parse(atob(token)); } catch { return Response.json({ error: 'Invalid token' }, { status: 401, headers: corsHeaders }); }
       if (Date.now() > payload.exp) return Response.json({ error: 'Token expired' }, { status: 401, headers: corsHeaders });
-      const data = await XP_STORAGE.get(payload.pubkey, { type: 'json' }) || { xp: 0, lastUpdated: Date.now() };
+      const data = await XP_STORAGE.get(payload.pubkey, { type: 'json' }) || { xp: 0 };
       return Response.json(data, { headers: corsHeaders });
     }
 
@@ -56,7 +53,7 @@ async function handleRequest(request) {
       try { payload = JSON.parse(atob(token)); } catch { return Response.json({ error: 'Invalid token' }, { status: 401, headers: corsHeaders }); }
       if (Date.now() > payload.exp) return Response.json({ error: 'Token expired' }, { status: 401, headers: corsHeaders });
       const { xp } = await request.json();
-      const data = { xp, lastUpdated: Date.now() };
+      const data = { xp };
       await XP_STORAGE.put(payload.pubkey, JSON.stringify(data));
       return Response.json(data, { headers: corsHeaders });
     }
@@ -92,5 +89,5 @@ async function checkNFTGate(pubkey) {
     body: JSON.stringify(body) 
   });
   const { result } = await res.json();
-  return result?.total > 0;  // Use total, not items.length
+  return result?.total > 0;
 }
