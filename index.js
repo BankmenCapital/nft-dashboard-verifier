@@ -5,7 +5,8 @@ import bs58 from "bs58";
 const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=ee8ad64e-dacb-4966-a9a6-65dfeb7d54d6`;
 const COLLECTION_KEY = 'GPtMdqNwNFnZGojyxEseXviJUZiqHyHDzWySjSHFup7J';
 
-// ... rest of your code (unchanged)
+// ADD THIS IF NOT ALREADY (for KV)
+const XP_STORAGE = YOUR_KV_NAMESPACE;  // e.g., BANKMEN_XP
 
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request));
@@ -16,7 +17,7 @@ async function handleRequest(request) {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   };
 
   if (request.method === 'OPTIONS') {
@@ -48,15 +49,15 @@ async function handleRequest(request) {
     }
 
     if (url.pathname === '/xp' && request.method === 'POST') {
-      const token = request.headers.get('Authorization')?.split(' ')[1];
+      const authHeader = request.headers.get('Authorization');
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
       if (!token) return Response.json({ error: 'No token' }, { status: 401, headers: corsHeaders });
       let payload;
       try { payload = JSON.parse(atob(token)); } catch { return Response.json({ error: 'Invalid token' }, { status: 401, headers: corsHeaders }); }
       if (Date.now() > payload.exp) return Response.json({ error: 'Token expired' }, { status: 401, headers: corsHeaders });
-      const { pubkey, xp } = await request.json();
-      if (pubkey !== payload.pubkey) return Response.json({ error: 'Pubkey mismatch' }, { status: 403, headers: corsHeaders });
+      const { xp } = await request.json();
       const data = { xp, lastUpdated: Date.now() };
-      await XP_STORAGE.put(pubkey, JSON.stringify(data));
+      await XP_STORAGE.put(payload.pubkey, JSON.stringify(data));
       return Response.json(data, { headers: corsHeaders });
     }
 
@@ -80,12 +81,16 @@ async function checkNFTGate(pubkey) {
     method: 'searchAssets',
     params: {
       ownerAddress: pubkey,
-      groupValue: COLLECTION_KEY,
       groupKey: 'collection',
+      groupValue: COLLECTION_KEY,
       limit: 1,
     },
   };
-  const res = await fetch(HELIUS_RPC, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const res = await fetch(HELIUS_RPC, { 
+    method: 'POST', 
+    headers: { 'Content-Type': 'application/json' }, 
+    body: JSON.stringify(body) 
+  });
   const { result } = await res.json();
-  return result?.items?.length > 0;
+  return result?.total > 0;  // Use total, not items.length
 }
