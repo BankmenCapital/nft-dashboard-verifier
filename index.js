@@ -27,14 +27,37 @@ async function handleRequest(request) {
       if (!verifySignature(message, signature, pubkey)) {
         return Response.json({ error: 'Invalid signature' }, { status: 401, headers: corsHeaders });
       }
-      const hasNFT = await checkNFTGate(pubkey);
+
+      // FIXED: Use getAssetsByGroup for collection
+      const body = {
+        jsonrpc: '2.0',
+        id: '1',
+        method: 'getAssetsByGroup',
+        params: {
+          groupKey: 'collection',
+          groupValue: COLLECTION_KEY,
+          page: 1,
+          limit: 1  // Just check existence
+        },
+      };
+      const res = await fetch(HELIUS_RPC, { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify(body) 
+      });
+      const data = await res.json();
+      const items = data.result?.items || [];
+      const hasNFT = items.some(item => item.ownership.owner === pubkey);
+
       if (!hasNFT) {
         return Response.json({ error: 'No NFT from collection' }, { status: 403, headers: corsHeaders });
       }
-      const token = btoa(JSON.stringify({ pubkey, exp: Date.now() + 86400000 })); // 24h
+
+      const token = btoa(JSON.stringify({ pubkey, exp: Date.now() + 86400000 }));
       return Response.json({ token }, { headers: corsHeaders });
     }
 
+    // /xp GET/POST unchanged...
     if (url.pathname === '/xp' && request.method === 'GET') {
       const token = url.searchParams.get('token');
       if (!token) return Response.json({ error: 'No token' }, { status: 401, headers: corsHeaders });
@@ -69,25 +92,4 @@ function verifySignature(message, signature, pubkey) {
   const sigBytes = bs58.decode(signature);
   const pubBytes = bs58.decode(pubkey);
   return nacl.sign.detached.verify(encodedMsg, sigBytes, pubBytes);
-}
-
-async function checkNFTGate(pubkey) {
-  const body = {
-    jsonrpc: '2.0',
-    id: '1',
-    method: 'searchAssets',
-    params: {
-      ownerAddress: pubkey,
-      groupKey: 'collection',
-      groupValue: COLLECTION_KEY,
-      limit: 1,
-    },
-  };
-  const res = await fetch(HELIUS_RPC, { 
-    method: 'POST', 
-    headers: { 'Content-Type': 'application/json' }, 
-    body: JSON.stringify(body) 
-  });
-  const { result } = await res.json();
-  return result?.total > 0;
 }
