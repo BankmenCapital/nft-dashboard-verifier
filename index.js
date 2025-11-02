@@ -2,7 +2,7 @@
 import nacl from "tweetnacl";
 import bs58 from "bs58";
 
-const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=ee8ad64e-dacb-4966-a9a6-65dfeb7d54d6`;
+const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=7c387280-8cd8-4801-894e-493214d392ae`;
 const COLLECTION_KEY = 'GPtMdqNwNFnZGojyxEseXviJUZiqHyHDzWySjSHFup7J';
 
 addEventListener('fetch', event => {
