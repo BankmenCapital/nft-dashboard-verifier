@@ -2,7 +2,7 @@
 import nacl from "tweetnacl";
 import bs58 from "bs58";
 
-const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=7c387280-8cd8-4801-894e-493214d392ae`;
+const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=7c387280-8cd8-4801-894e-493214d392ae`; // Keep your new key
 const COLLECTION_KEY = 'GPtMdqNwNFnZGojyxEseXviJUZiqHyHDzWySjSHFup7J';
 
 addEventListener('fetch', event => {
@@ -28,16 +28,18 @@ async function handleRequest(request) {
         return Response.json({ error: 'Invalid signature' }, { status: 401, headers: corsHeaders });
       }
 
-      // FIXED: Use getAssetsByGroup for collection
+      // DEBUG: Log request
+      console.log('Auth request for pubkey:', pubkey);
+
       const body = {
         jsonrpc: '2.0',
         id: '1',
-        method: 'getAssetsByGroup',
+        method: 'searchAssets',
         params: {
+          ownerAddress: pubkey,
           groupKey: 'collection',
           groupValue: COLLECTION_KEY,
-          page: 1,
-          limit: 1  // Just check existence
+          limit: 1,
         },
       };
       const res = await fetch(HELIUS_RPC, { 
@@ -46,11 +48,11 @@ async function handleRequest(request) {
         body: JSON.stringify(body) 
       });
       const data = await res.json();
-      const items = data.result?.items || [];
-      const hasNFT = items.some(item => item.ownership.owner === pubkey);
+      console.log('Helius response:', JSON.stringify(data));  // DEBUG LOG
 
-      if (!hasNFT) {
-        return Response.json({ error: 'No NFT from collection' }, { status: 403, headers: corsHeaders });
+      const total = data.result?.total || 0;
+      if (total === 0) {
+        return Response.json({ error: 'No NFT from collection', debug: data }, { status: 403, headers: corsHeaders });
       }
 
       const token = btoa(JSON.stringify({ pubkey, exp: Date.now() + 86400000 }));
