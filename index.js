@@ -2,7 +2,7 @@
 import nacl from "tweetnacl";
 import bs58 from "bs58";
 
-const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=7c387280-8cd8-4801-894e-493214d392ae`; // Keep your new key
+const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=7c387280-8cd8-4801-894e-493214d392ae`;
 const COLLECTION_KEY = 'GPtMdqNwNFnZGojyxEseXviJUZiqHyHDzWySjSHFup7J';
 
 addEventListener('fetch', event => {
@@ -28,17 +28,13 @@ async function handleRequest(request) {
         return Response.json({ error: 'Invalid signature' }, { status: 401, headers: corsHeaders });
       }
 
-      // DEBUG: Log request
-      console.log('Auth request for pubkey:', pubkey);
-
       const body = {
         jsonrpc: '2.0',
         id: '1',
         method: 'searchAssets',
         params: {
           ownerAddress: pubkey,
-          groupKey: 'collection',
-          groupValue: COLLECTION_KEY,
+          grouping: ["collection", COLLECTION_KEY],
           limit: 1,
         },
       };
@@ -48,18 +44,17 @@ async function handleRequest(request) {
         body: JSON.stringify(body) 
       });
       const data = await res.json();
-      console.log('Helius response:', JSON.stringify(data));  // DEBUG LOG
 
       const total = data.result?.total || 0;
       if (total === 0) {
-        return Response.json({ error: 'No NFT from collection', debug: data }, { status: 403, headers: corsHeaders });
+        return Response.json({ error: 'No NFT from collection' }, { status: 403, headers: corsHeaders });
       }
 
       const token = btoa(JSON.stringify({ pubkey, exp: Date.now() + 86400000 }));
       return Response.json({ token }, { headers: corsHeaders });
     }
 
-    // /xp GET/POST unchanged...
+    // /xp GET
     if (url.pathname === '/xp' && request.method === 'GET') {
       const token = url.searchParams.get('token');
       if (!token) return Response.json({ error: 'No token' }, { status: 401, headers: corsHeaders });
@@ -70,6 +65,7 @@ async function handleRequest(request) {
       return Response.json(data, { headers: corsHeaders });
     }
 
+    // /xp POST
     if (url.pathname === '/xp' && request.method === 'POST') {
       const authHeader = request.headers.get('Authorization');
       const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
